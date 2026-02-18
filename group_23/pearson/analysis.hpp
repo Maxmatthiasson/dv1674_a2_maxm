@@ -2,6 +2,13 @@
 Author: David Holmqvist <daae19@student.bth.se>
 */
 
+// Added x_mag and y_mag as parameters to pearson().
+
+/*
+Optimization v3:
+- pearson() uses reference instead of value.
+*/
+
 #include "vector.hpp"
 #include <vector>
 
@@ -10,7 +17,7 @@ Author: David Holmqvist <daae19@student.bth.se>
 
 namespace Analysis {
 std::vector<double> correlation_coefficients(std::vector<Vector> datasets);
-double pearson(Vector vec1, Vector vec2);
+double pearson(Vector& x_mm, Vector& y_mm, double x_mag, double y_mag);
 };
 
 #endif

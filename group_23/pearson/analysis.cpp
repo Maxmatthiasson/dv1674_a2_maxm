@@ -2,45 +2,74 @@
 Author: David Holmqvist <daae19@student.bth.se>
 */
 
+/*
+Optimization v2:
+- Pre-computing the mean for all datasets and the magnitued in the 
+  correlation_coefficients() function.
+- pearson() now takes magnitudes as parameters. 
+- This reduces the number of functions calls to mean() and magnitude().
+
+Optimization v3:
+- Using in-place vector operations to avoid the overhead of memory allocation
+  and copying.
+- Passing vectors by reference instead of by value to pearson().
+*/
+
 #include "analysis.hpp"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <list>
 #include <vector>
 
 namespace Analysis {
 
 std::vector<double> correlation_coefficients(std::vector<Vector> datasets)
 {
-    std::vector<double> result {};
+    std::vector<double> result{};
+    const auto n = datasets.size();
 
-    for (auto sample1 { 0 }; sample1 < datasets.size() - 1; sample1++) {
-        for (auto sample2 { sample1 + 1 }; sample2 < datasets.size(); sample2++) {
-            auto corr { pearson(datasets[sample1], datasets[sample2]) };
-            result.push_back(corr);
+    // Precomputing means for all datasets
+    std::vector<double> means(n);
+    for (auto i = 0u; i < n; i++) {
+        means[i] = datasets[i].mean();
+    }
+
+    // Precomputing magnitudes
+    std::vector<double> magnitudes(n);
+    for (auto i = 0u; i < n; i++) {
+        Vector x_mm = datasets[i];
+        x_mm -= means[i]; // In-place subtraction
+        magnitudes[i] = x_mm.magnitude();
+    }
+
+    for (auto sample1 = 0u; sample1 < n - 1; sample1++) {
+        for (auto sample2 = sample1 + 1; sample2 < n; sample2++) {
+            Vector x_mm = datasets[sample1];
+            Vector y_mm = datasets[sample2];
+            
+            // Using in-place subtraction
+            x_mm -= means[sample1];
+            y_mm -= means[sample2];
+
+            double r = pearson(x_mm, y_mm, magnitudes[sample1], magnitudes[sample2]);
+            result.push_back(r);
         }
     }
 
     return result;
 }
 
-double pearson(Vector vec1, Vector vec2)
+// Now passes vectors by reference instead of by value
+double pearson(Vector& x_mm, Vector& y_mm, double x_mag, double y_mag)
 {
-    auto x_mean { vec1.mean() };
-    auto y_mean { vec2.mean() };
+    // In-place division
+    x_mm /= x_mag;
+    y_mm /= y_mag;
 
-    auto x_mm { vec1 - x_mean };
-    auto y_mm { vec2 - y_mean };
-
-    auto x_mag { x_mm.magnitude() };
-    auto y_mag { y_mm.magnitude() };
-
-    auto x_mm_over_x_mag { x_mm / x_mag };
-    auto y_mm_over_y_mag { y_mm / y_mag };
-
-    auto r { x_mm_over_x_mag.dot(y_mm_over_y_mag) };
-
+    double r = x_mm.dot(y_mm);
     return std::max(std::min(r, 1.0), -1.0);
 }
-};
+
+}
+
+

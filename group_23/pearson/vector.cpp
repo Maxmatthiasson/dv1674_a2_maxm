@@ -2,6 +2,12 @@
 Author: David Holmqvist <daae19@student.bth.se>
 */
 
+/*
+Optimization v3:
+- Added in-place division.
+- Added in-place subtraction.
+*/
+
 #include "vector.hpp"
 #include <iostream>
 #include <cmath>
@@ -113,4 +119,22 @@ double Vector::dot(Vector rhs) const
     }
 
     return result;
+}
+
+// In-place division.
+Vector& Vector::operator/=(double div)
+{
+    for (auto i{0}; i < size; i++) {
+        data[i] /= div;
+    }
+    return *this;
+}
+
+// In-place subtraction.
+Vector& Vector::operator-=(double sub)
+{
+    for (auto i{0}; i < size; i++) {
+        data[i] -= sub;
+    }
+    return *this;
 }

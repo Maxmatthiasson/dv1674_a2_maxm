@@ -2,6 +2,12 @@
 Author: David Holmqvist <daae19@student.bth.se>
 */
 
+/*
+Optimization v3:
+- Added in-place divison operator
+- Added in-place subtraction operator
+*/
+
 #if !defined(VECTOR_HPP)
 #define VECTOR_HPP
 
@@ -29,6 +35,10 @@ public:
     Vector operator-(double sub);
     double operator[](unsigned i) const;
     double& operator[](unsigned i);
+
+    Vector& operator/=(double div); // In-place division
+    Vector& operator-=(double sub); // In-place subtraction
 };
+
 
 #endif
